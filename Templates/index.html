@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dental Plaque Detection</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="container">
+    <h1>Dental Plaque Detection</h1>
+
+    {% if error %}
+      <div class="error">{{ error }}</div>
+    {% endif %}
+
+    <form method="POST" enctype="multipart/form-data" class="upload-form">
+      <label class="file-input-label">
+        <span>Choose a photo</span>
+        <input type="file" name="image" accept="image/*" required>
+      </label>
+      <button type="submit">Analyse</button>
+    </form>
+
+    {% if original_image and result_image %}
+      <div class="results">
+        <h2>Result</h2>
+        <p>Plaque coverage (whole image): <strong>{{ plaque_percent }}%</strong></p>
+
+        <div class="images">
+          <div>
+            <h3>Original</h3>
+            <img src="{{ original_image }}" alt="Original image">
+          </div>
+          <div>
+            <h3>Plaque overlay</h3>
+            <img src="{{ result_image }}" alt="Plaque overlay">
+          </div>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</body>
+</html>
