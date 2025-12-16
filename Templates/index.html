@@ -2,43 +2,92 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Dental Plaque Detection</title>
+  <title>Dental Plaque Detection - Batch Mode</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='Style.css') }}">
 </head>
 <body>
+
   <div class="container">
-    <h1>Dental Plaque Detection</h1>
+    <h1>Dental Plaque Detection - Batch Analysis</h1>
 
     {% if error %}
       <div class="error">{{ error }}</div>
     {% endif %}
 
-    <form method="POST" enctype="multipart/form-data" class="upload-form">
-      <label class="file-input-label">
-        <span>Choose a photo</span>
-        <input type="file" name="image" accept="image/*" required>
-      </label>
-      <button type="submit">Analyse</button>
+    <!-- Formulaire Multi-Upload -->
+    <form method="POST" enctype="multipart/form-data">
+      <div class="upload-area">
+        <label class="btn-upload">
+            Select Photos (Multiple allowed)
+            <!-- Note le name="images" et l'attribut multiple -->
+            <input id="image-input" type="file" name="images" accept="image/*" multiple required>
+        </label>
+        <p id="file-count">No files selected</p>
+
+        <!-- Zone de prévisualisation JS -->
+        <div id="preview-container" class="preview-grid"></div>
+
+        <button type="submit" class="btn-submit">Analyze All Images</button>
+      </div>
     </form>
 
-    {% if original_image and result_image %}
-      <div class="results">
-        <h2>Result</h2>
-        <p>Plaque coverage (whole image): <strong>{{ plaque_percent }}%</strong></p>
+    <!-- Affichage des résultats en Grille -->
+    {% if results %}
+      <h2>Analysis Results ({{ results|length }} files)</h2>
+      <div class="results-grid">
 
-        <div class="images">
-          <div>
-            <h3>Original</h3>
-            <img src="{{ original_image }}" alt="Original image">
-          </div>
-          <div>
-            <h3>Plaque overlay</h3>
-            <img src="{{ result_image }}" alt="Plaque overlay">
-          </div>
+        {% for item in results %}
+        <div class="result-card">
+            <h3>{{ item.name }}</h3>
+
+            <!-- Code couleur simple pour le score -->
+            <div class="score-badge">
+                Plaque Coverage: {{ item.percent }}%
+            </div>
+
+            <div class="comparison">
+                <!-- Original -->
+                <img src="{{ item.original }}" alt="Original">
+                <!-- Résultat avec Overlay Bleu -->
+                <img src="{{ item.result }}" alt="Detection Result">
+            </div>
         </div>
+        {% endfor %}
+
       </div>
     {% endif %}
   </div>
+
+<script>
+  // Script pour prévisualiser plusieurs images avant l'envoi
+  document.getElementById('image-input').addEventListener('change', function(event) {
+    const files = event.target.files;
+    const previewContainer = document.getElementById('preview-container');
+    const fileCount = document.getElementById('file-count');
+
+    // Reset
+    previewContainer.innerHTML = '';
+
+    if (files.length > 0) {
+        fileCount.textContent = files.length + " file(s) selected";
+
+        // Boucle sur chaque fichier pour créer une miniature
+        Array.from(files).forEach(file => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.className = 'preview-thumb';
+                previewContainer.appendChild(img);
+            }
+            reader.readAsDataURL(file);
+        });
+    } else {
+        fileCount.textContent = "No files selected";
+    }
+  });
+</script>
+
 </body>
 </html>
